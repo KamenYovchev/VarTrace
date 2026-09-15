@@ -1,0 +1,47 @@
+[project]
+name = "vartrace"
+dynamic = ["version"]
+description = "Estimates whether a variant seen in single-cell RNA-seq is present in the genome"
+readme = "README.md"
+authors = [{ name = "Kamen Yovchev", email = "kamen.yovchev@gmail.com" }]
+license = "PolyForm-Noncommercial-1.0.0 AND CC-BY-NC-4.0"
+license-files = ["LICENSE", "LICENSE-MODELS"]
+requires-python = ">=3.12"
+dependencies = [
+    # exact versions: the models were saved with these and may not load otherwise
+    "scikit-learn==1.9.0",
+    "xgboost==3.4.0",
+    "joblib==1.5.3",
+    "numpy==2.4.6",
+    "pandas==3.0.5",
+    "requests",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "python-multipart",
+]
+
+[project.scripts]
+vartrace = "vartrace.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "vartrace/__init__.py"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[tool.pixi.dependencies]
+python = "3.12.*"
+pytest = "*"
+
+[tool.pixi.pypi-dependencies]
+vartrace = { path = ".", editable = true, extras = ["web"] }
