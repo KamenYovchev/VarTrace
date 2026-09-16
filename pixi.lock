@@ -1553,7 +1553,7 @@ packages:
 - pypi: ./
   name: vartrace
   version: 0.1.0
-  sha256: e5680e9547d142908a2a533ea7dc502cae75002778355003efe6bf5724a96540
+  sha256: 73ca6c2ac56887d6b0cab18dfe0114bd2457d4b5dc5edc116b8a6790aaac754a
   requires_dist:
   - joblib==1.5.3
   - numpy==2.4.6
