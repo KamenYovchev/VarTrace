@@ -20,26 +20,28 @@ variants scored that way, about 87 really are absent from the genome.
 
 ## Installing
 
+    pipx install vartrace
+
+Or, for the latest state of the source:
+
     pipx install "git+https://codeberg.org/KamenYovchev/vartrace.git"
 
-For the web interface as well:
-
-    pipx install "vartrace[web] @ git+https://codeberg.org/KamenYovchev/vartrace.git"
-
-The trained models come with the package, so nothing else has to be downloaded.
+The trained models come with the package and the web interface is included, so
+nothing else has to be downloaded or installed separately.
 
 
 ## Using it
 
-One file per cell, or one file holding many cells:
+Run it with nothing after it and the web interface opens in the browser. It
+listens only on your own machine, so the files you load stay on it.
+
+    vartrace
+
+Give it files instead and it works from the command line, one file per cell or
+one file holding many cells:
 
     vartrace cell_01.vcf
     vartrace cells/*.tsv --threshold 0.867 --output results.tsv
-
-A web interface, which opens in the browser and listens only on your own
-machine:
-
-    vartrace serve
 
 Options:
 

@@ -62,11 +62,6 @@ def serve(argv):
                              "this machine only, for serving others")
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args(argv)
-    try:
-        import streamlit  # noqa: F401
-    except ImportError:
-        sys.exit('the web interface needs extra packages, install with '
-                 'pipx install "vartrace[web]"')
 
     # people upload genomic data here, so by default nothing outside this
     # machine can reach it
@@ -77,6 +72,7 @@ def serve(argv):
                          daemon=True).start()
 
     print(f"open {url} in a browser, stop with Ctrl-C")
+    print("to work from the command line instead, run: vartrace --help")
     if args.expose:
         print("warning: reachable from the network, anyone who can reach this "
               "port can upload files")
@@ -95,6 +91,12 @@ def run(argv):
         prog="vartrace",
         description="Estimate whether variants seen in single-cell RNA-seq "
                     "are present in the genome.",
+        epilog="run vartrace with no file at all and the web interface opens\n"
+               "in the browser. Use serve instead of a file to give it a port\n"
+               "of its own:\n"
+               "\n"
+               "    vartrace serve --port 8600\n",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("files", nargs="+",
                         help="one VCF or ANNOVAR table per cell")
@@ -129,6 +131,10 @@ def run(argv):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if argv and argv[0] == "serve":
+    # plain "vartrace" opens the interface, because that is what most people
+    # who install this will want and the command line is the harder path
+    if not argv:
+        return serve([])
+    if argv[0] == "serve":
         return serve(argv[1:])
     return run(argv)
