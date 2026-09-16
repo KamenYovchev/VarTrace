@@ -1,0 +1,149 @@
+{
+  "name": "partial annotation",
+  "use_when": "some but not all database features present, including after self-annotation through Ensembl; one or many files",
+  "algorithm": "XGBClassifier",
+  "hyperparameters": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 300,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "calibration": "isotonic, cv=3, folds grouped by variant",
+  "features": [
+    "ref_count",
+    "alt_count",
+    "vaf",
+    "dp",
+    "qual",
+    "gq",
+    "fs",
+    "sor",
+    "mq",
+    "mqranksum",
+    "readposranksum",
+    "baseqranksum",
+    "qd",
+    "sub_A_C",
+    "sub_A_G",
+    "sub_A_T",
+    "sub_C_A",
+    "sub_C_G",
+    "sub_C_T",
+    "sub_G_A",
+    "sub_G_C",
+    "sub_G_T",
+    "sub_T_A",
+    "sub_T_C",
+    "sub_T_G",
+    "is_transition",
+    "n_cells_variant",
+    "frac_cells",
+    "vaf_mean_cells",
+    "vaf_sd_cells",
+    "in_dbsnp",
+    "gnomad_af",
+    "in_gnomad",
+    "in_rediportal",
+    "in_cosmic"
+  ],
+  "n_features": 35,
+  "optional_blocks": {
+    "dbsnp": [
+      "in_dbsnp"
+    ],
+    "gnomad": [
+      "gnomad_af",
+      "in_gnomad"
+    ],
+    "redi": [
+      "in_rediportal"
+    ],
+    "cosmic": [
+      "in_cosmic"
+    ],
+    "cells": [
+      "n_cells_variant",
+      "frac_cells",
+      "vaf_mean_cells",
+      "vaf_sd_cells"
+    ]
+  },
+  "missing_values": "Passed as NaN and never filled. The model was trained with feature groups withheld at random, so it has learned how to handle their absence.",
+  "trained_on": {
+    "rows": 12916,
+    "unique_variants": 6317,
+    "cell_lines": [
+      "hg001",
+      "hg002",
+      "molm13"
+    ],
+    "cells": 45,
+    "prevalence_rna_only": 0.4172,
+    "augmentation": "4 copies of the training set; the first intact, in each later copy every optional block withheld with probability 0.5"
+  },
+  "metrics_cv_by_variant": {
+    "all five databases, many files": {
+      "roc_auc": 0.9689,
+      "pr_auc": 0.97,
+      "brier": 0.0501,
+      "ece": 0.0065,
+      "precision_at_0.5": 0.9698,
+      "recall_at_0.5": 0.8811,
+      "precision_at_0.867": 0.9919,
+      "recall_at_0.867": 0.8369
+    },
+    "dbSNP+gnomAD, many files": {
+      "roc_auc": 0.9683,
+      "pr_auc": 0.9694,
+      "brier": 0.0506,
+      "ece": 0.0059,
+      "precision_at_0.5": 0.9693,
+      "recall_at_0.5": 0.8786,
+      "precision_at_0.867": 0.9925,
+      "recall_at_0.867": 0.8343
+    },
+    "dbSNP+gnomAD, one file": {
+      "roc_auc": 0.9608,
+      "pr_auc": 0.9625,
+      "brier": 0.0558,
+      "ece": 0.0063,
+      "precision_at_0.5": 0.9617,
+      "recall_at_0.5": 0.8753,
+      "precision_at_0.867": 0.9866,
+      "recall_at_0.867": 0.8228
+    },
+    "gnomAD only, many files": {
+      "roc_auc": 0.9672,
+      "pr_auc": 0.9686,
+      "brier": 0.0521,
+      "ece": 0.008,
+      "precision_at_0.5": 0.9637,
+      "recall_at_0.5": 0.882,
+      "precision_at_0.867": 0.9901,
+      "recall_at_0.867": 0.8371
+    },
+    "dbSNP only, many files": {
+      "roc_auc": 0.9436,
+      "pr_auc": 0.9489,
+      "brier": 0.0711,
+      "ece": 0.0092,
+      "precision_at_0.5": 0.9621,
+      "recall_at_0.5": 0.8152,
+      "precision_at_0.867": 0.9934,
+      "recall_at_0.867": 0.7805
+    },
+    "gnomAD+REDIportal without dbSNP": {
+      "roc_auc": 0.9672,
+      "pr_auc": 0.9686,
+      "brier": 0.0521,
+      "ece": 0.008,
+      "precision_at_0.5": 0.9637,
+      "recall_at_0.5": 0.8822,
+      "precision_at_0.867": 0.9899,
+      "recall_at_0.867": 0.8373
+    }
+  },
+  "not_for": "No database features at all. There this model trails the dedicated 26- and 30-feature models by about 0.017, so those are used instead.",
+  "date": "2026-09-15"
+}

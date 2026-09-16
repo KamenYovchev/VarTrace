@@ -1,0 +1,64 @@
+{
+  "name": "data-only, with cross-cell",
+  "use_when": "many VCFs",
+  "algorithm": "GradientBoostingClassifier",
+  "hyperparameters": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 300
+  },
+  "calibration": "isotonic, cv=3",
+  "features": [
+    "ref_count",
+    "alt_count",
+    "vaf",
+    "dp",
+    "qual",
+    "gq",
+    "fs",
+    "sor",
+    "mq",
+    "mqranksum",
+    "readposranksum",
+    "baseqranksum",
+    "qd",
+    "sub_A_C",
+    "sub_A_G",
+    "sub_A_T",
+    "sub_C_A",
+    "sub_C_G",
+    "sub_C_T",
+    "sub_G_A",
+    "sub_G_C",
+    "sub_G_T",
+    "sub_T_A",
+    "sub_T_C",
+    "sub_T_G",
+    "is_transition",
+    "n_cells_variant",
+    "frac_cells",
+    "vaf_mean_cells",
+    "vaf_sd_cells"
+  ],
+  "n_features": 30,
+  "trained_on": {
+    "rows": 12916,
+    "unique_variants": 6317,
+    "cell_lines": [
+      "hg001",
+      "hg002",
+      "molm13"
+    ],
+    "prevalence_rna_only": 0.4172
+  },
+  "metrics_cv_by_variant": {
+    "roc_auc": 0.9112,
+    "pr_auc": 0.8907,
+    "precision": 0.8269,
+    "recall": 0.8102,
+    "f1": 0.8184,
+    "accuracy": 0.85,
+    "prevalence": 0.4172
+  },
+  "date": "2026-08-27"
+}

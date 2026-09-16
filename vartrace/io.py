@@ -3,6 +3,11 @@
 A plain VCF, or a table annotated with ANNOVAR. In the annotated table the VCF
 fields sit in the Otherinfo columns, which is how ANNOVAR carries them over.
 
+A VCF may hold one sample or many. In single-cell work the second is common,
+one column per cell barcode, and then every column is treated as its own cell.
+A cell is only counted for a variant when its genotype or its allele depth says
+it carries it, otherwise every cell would appear to carry everything.
+
 Only biallelic single base substitutions are kept, because that is what the
 models were trained on. Everything else is counted and skipped.
 """
@@ -32,25 +37,52 @@ def cell_name(path):
     return name
 
 
+def carries(fmt, value):
+    """Does this sample actually have the variant."""
+    fields = dict(zip(fmt.split(":"), value.split(":")))
+    gt = fields.get("GT", "")
+    if gt:
+        return "1" in gt.replace("|", "/").split("/")
+    ad = fields.get("AD", "")
+    if "," in ad:
+        try:
+            return int(ad.split(",")[1]) > 0
+        except ValueError:
+            return False
+    return False
+
+
 def read_vcf(path):
     variants, skipped = [], 0
-    cell = cell_name(path)
+    samples = []
     with open(path) as fh:
         for line in fh:
-            if line.startswith("#"):
+            if line.startswith("##"):
+                continue
+            if line.startswith("#CHROM"):
+                samples = line.rstrip("\n").split("\t")[9:]
                 continue
             c = line.rstrip("\n").split("\t")
             if len(c) < 10:
                 skipped += 1
                 continue
-            chrom, pos, _, ref, alt, qual, _, info, fmt, sample = c[:10]
+            chrom, pos, _, ref, alt, qual, _, info, fmt = c[:9]
             if not is_snv(ref, alt):
                 skipped += 1
                 continue
-            variants.append(Variant(cell=cell, chrom=chrom, pos=pos, ref=ref,
-                                    alt=alt, qual=qual, info=info,
-                                    format=fmt, sample=sample))
-    return variants, skipped
+            for i, value in enumerate(c[9:]):
+                if len(samples) > 1:
+                    if not carries(fmt, value):
+                        continue
+                    cell = samples[i]
+                else:
+                    cell = cell_name(path)
+                variants.append(Variant(cell=cell, chrom=chrom, pos=pos, ref=ref,
+                                        alt=alt, qual=qual, info=info,
+                                        format=fmt, sample=value))
+                if len(samples) <= 1:
+                    break
+    return variants, skipped, max(len(samples), 1)
 
 
 def read_annovar(path):
@@ -96,7 +128,7 @@ def read_annovar(path):
                 rediportal=c[idx[REDI_COL]] if "redi" in databases else "",
                 cosmic=c[idx[COSMIC_COL]] if "cosmic" in databases else "",
             ))
-    return variants, skipped
+    return variants, skipped, 1
 
 
 def looks_annotated(path):
@@ -112,10 +144,15 @@ def read(path):
 
 
 def read_all(paths):
-    """Returns every variant from every file, and how many cells that was."""
-    variants, skipped = [], 0
+    """Every variant from every file, and how many cells that was.
+
+    One file per cell gives one cell each; a VCF with many samples gives as
+    many cells as it has samples.
+    """
+    variants, skipped, cells = [], 0, 0
     for path in paths:
-        got, lost = read(path)
+        got, lost, n = read(path)
         variants.extend(got)
         skipped += lost
-    return variants, len(paths), skipped
+        cells += n
+    return variants, cells, skipped

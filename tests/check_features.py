@@ -48,7 +48,7 @@ wanted = set(zip(expected["cell"], expected["chr"],
 
 variants = []
 for path in sorted(glob.glob(os.path.join(labeled_dir, "*.labeled.tsv"))):
-    got, _ = io.read_annovar(path)
+    got, _, _ = io.read_annovar(path)
     variants.extend(v for v in got
                     if (v.cell, v.chrom, v.pos, v.ref, v.alt) in wanted)
 print(f"read back: {len(variants)} variants")

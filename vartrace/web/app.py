@@ -69,7 +69,7 @@ with st.sidebar:
     uploaded = st.file_uploader("One VCF or ANNOVAR table per cell",
                                 type=["vcf", "tsv", "txt"],
                                 accept_multiple_files=True)
-    threshold = st.slider("Threshold", 0.0, 1.0, 0.5, 0.001)
+    threshold = st.slider("Threshold", 0.0, 1.0, 0.5, 0.01)
     st.caption("0.867 is the high confidence mode, where precision is about "
                "0.99")
     use_ensembl = st.checkbox("Look up dbSNP and gnomAD at Ensembl if the "

@@ -150,6 +150,16 @@ def matrix(variants, names):
     return np.array(rows, dtype=float)
 
 
+def without_allele_counts(variants):
+    """How many variants came without the allele fraction.
+
+    It is the feature the models lean on most after the databases, and a file
+    that does not carry AD or VAF cannot produce it. Scores from such a file
+    would look ordinary and mean nothing, so the caller warns about it.
+    """
+    return sum(1 for v in variants if v.features["vaf"] is None)
+
+
 def available(variants):
     """Which feature groups this input can support."""
     f = variants[0].features

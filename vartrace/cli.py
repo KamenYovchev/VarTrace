@@ -15,6 +15,13 @@ from vartrace import __version__, annotate, features, io, model as models, repor
 def score(variants, n_cells, models_dir, use_ensembl, log=print):
     """Everything between reading the files and having a score per variant."""
     features.compute(variants, n_cells)
+
+    blind = features.without_allele_counts(variants)
+    if blind > 0.2 * len(variants):
+        log(f"warning: {blind} of {len(variants)} variants have no allele "
+            "fraction, because the input carries neither AD nor VAF. The "
+            "scores will not mean much.")
+
     available = features.available(variants)
 
     annotation = None

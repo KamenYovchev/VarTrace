@@ -45,7 +45,7 @@ loaded = models.load_all(models_dir)
 
 by_line = {}
 for path in sorted(glob.glob(os.path.join(labeled_dir, "*.labeled.tsv"))):
-    got, _ = io.read_annovar(path)
+    got, _, _ = io.read_annovar(path)
     got = [v for v in got if (v.cell, v.chrom, v.pos, v.ref, v.alt) in wanted]
     if got:
         by_line.setdefault(group_of(got[0].cell), []).append(got)
