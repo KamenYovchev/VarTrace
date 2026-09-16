@@ -19,10 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 web = [
-    "fastapi",
-    "uvicorn",
-    "jinja2",
-    "python-multipart",
+    "streamlit",
 ]
 
 [project.scripts]
