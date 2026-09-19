@@ -38,6 +38,9 @@ platforms = ["osx-arm64", "linux-64"]
 [tool.pixi.dependencies]
 python = "3.12.*"
 pytest = "*"
+# only for development, so the page reloads by itself while the code is being
+# changed; it is not a dependency of the published package
+watchdog = "*"
 
 [tool.pixi.pypi-dependencies]
 vartrace = { path = ".", editable = true }

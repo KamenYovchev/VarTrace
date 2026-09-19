@@ -160,6 +160,18 @@ def without_allele_counts(variants):
     return sum(1 for v in variants if v.features["vaf"] is None)
 
 
+def without_read_level(variants):
+    """How many variants came without any of the read-level annotations.
+
+    FS, SOR, MQ and the rest of them are written by GATK. A VCF from
+    DeepVariant, bcftools or Clair3 carries none, and unlike the databases
+    there is no model trained for their absence, so seven of the thirty-five
+    features arrive empty and nothing in the numbers shows it.
+    """
+    names = [name for name, _ in READLEVEL]
+    return sum(1 for v in variants if all(v.features[n] is None for n in names))
+
+
 def available(variants):
     """Which feature groups this input can support."""
     f = variants[0].features

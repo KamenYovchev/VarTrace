@@ -12,15 +12,86 @@ import webbrowser
 from vartrace import __version__, annotate, features, io, model as models, report
 
 
-def score(variants, n_cells, models_dir, use_ensembl, log=print):
+MOST = 0.2  # a fifth of the input is enough to make the run a different thing
+
+
+class Refused(Exception):
+    """The input is outside what the models were trained on."""
+
+    def __init__(self, problems):
+        self.problems = problems
+        super().__init__("\n\n".join(p["what"] for p in problems))
+
+
+def check(paths, variants):
+    """The conditions that can be read off the files themselves.
+
+    Whether the reads came from single cells or from bulk, which chemistry was
+    used and what tissue it was leave no trace in a VCF and cannot be checked
+    here. They belong in the instructions. The four below do leave a trace, and
+    each of them changes what the scores mean rather than merely weakening
+    them, which is why the answer is to stop rather than to warn.
+    """
+    n = len(variants)
+    problems = []
+
+    if "GRCh37" in {io.genome_build(path) for path in paths}:
+        problems.append({
+            "what": "The files say GRCh37. The models and the Ensembl lookup "
+                    "both work on GRCh38, so every position here means "
+                    "something else.",
+            "do": "Lift the variants over to GRCh38, with CrossMap or the "
+                  "Ensembl Assembly Converter, and upload them again.",
+        })
+
+    plain = features.without_read_level(variants)
+    if plain > MOST * n:
+        problems.append({
+            "what": f"{plain} of {n} variants carry none of the read-level "
+                    "annotations, so 7 of the 35 features would be empty. FS, "
+                    "SOR, MQ, MQRankSum, ReadPosRankSum, BaseQRankSum and QD "
+                    "are written by GATK, and unlike the databases no model "
+                    "was trained without them.",
+            "do": "Call the variants with GATK HaplotypeCaller, or with a "
+                  "caller that writes the same INFO fields. If you already "
+                  "have BAM files, only the calling step has to be redone.",
+        })
+
+    blind = features.without_allele_counts(variants)
+    if blind > MOST * n:
+        problems.append({
+            "what": f"{blind} of {n} variants carry neither AD nor VAF, so "
+                    "they have no allele fraction. It is the feature the "
+                    "models lean on most after the databases.",
+            "do": "Keep the AD field when you filter or convert the VCF. Some "
+                  "tools drop it; bcftools annotate -x never touches AD "
+                  "unless it is asked to.",
+        })
+
+    shallow = sum(1 for v in variants
+                  if v.features["dp"] is not None and v.features["dp"] < 5)
+    if shallow > MOST * n:
+        problems.append({
+            "what": f"{shallow} of {n} variants are covered by fewer than 5 "
+                    "reads. Everything below 5 was removed from the training "
+                    "data, so these sit outside what the models have seen.",
+            "do": "Filter them out first: bcftools view -e 'FMT/DP<5'.",
+        })
+
+    return problems
+
+
+def score(variants, n_cells, models_dir, use_ensembl, log=print, paths=(),
+          anyway=False):
     """Everything between reading the files and having a score per variant."""
     features.compute(variants, n_cells)
 
-    blind = features.without_allele_counts(variants)
-    if blind > 0.2 * len(variants):
-        log(f"warning: {blind} of {len(variants)} variants have no allele "
-            "fraction, because the input carries neither AD nor VAF. The "
-            "scores will not mean much.")
+    # before the Ensembl call, so a refused run costs nobody anything
+    problems = check(paths, variants)
+    if problems and not anyway:
+        raise Refused(problems)
+    for problem in problems:
+        log("warning: " + problem["what"])
 
     available = features.available(variants)
 
@@ -53,6 +124,23 @@ def open_when_ready(port, url, timeout=30):
         time.sleep(0.3)
 
 
+# One accent colour and nothing else. Set here rather than in a config file,
+# because Streamlit looks for one in the working directory, which is wherever
+# the user happens to be standing when they type vartrace.
+THEME = {
+    "base": "light",
+    "primaryColor": "#2F6B45",
+    "backgroundColor": "#FFFFFF",
+    "secondaryBackgroundColor": "#F4F6F5",
+    "textColor": "#1F2933",
+    "linkColor": "#2F6B45",
+    "borderColor": "#D4DAD6",
+    "dataframeBorderColor": "#D4DAD6",
+    "baseRadius": "medium",
+    "buttonRadius": "medium",
+}
+
+
 def serve(argv):
     parser = argparse.ArgumentParser(prog="vartrace serve",
                                      description="Open the web interface.")
@@ -78,12 +166,19 @@ def serve(argv):
               "port can upload files")
     app = os.path.join(os.path.dirname(__file__), "web", "app.py")
     # headless stops Streamlit asking for an email address on first run, so the
-    # browser is opened above instead; statistics are off because of the data
-    return subprocess.call([sys.executable, "-m", "streamlit", "run", app,
-                            "--server.port", str(args.port),
-                            "--server.address", address,
-                            "--server.headless=true",
-                            "--browser.gatherUsageStats=false"])
+    # browser is opened above instead; statistics are off because of the data.
+    # The minimal toolbar removes Streamlit's own Deploy button, which offers
+    # to publish the app to their cloud and has no business here. A VCF holding
+    # a few hundred cells passes the default upload limit easily, hence 4 GB.
+    command = [sys.executable, "-m", "streamlit", "run", app,
+               "--server.port", str(args.port),
+               "--server.address", address,
+               "--server.headless=true",
+               "--server.maxUploadSize=4096",
+               "--client.toolbarMode=minimal",
+               "--browser.gatherUsageStats=false"]
+    command += [f"--theme.{name}={value}" for name, value in THEME.items()]
+    return subprocess.call(command)
 
 
 def run(argv):
@@ -107,17 +202,32 @@ def run(argv):
     parser.add_argument("--no-annotate", action="store_true",
                         help="do not ask Ensembl for dbSNP and gnomAD when the "
                              "input has no annotation of its own")
+    parser.add_argument("--anyway", action="store_true",
+                        help="score even when the input is outside what the "
+                             "models were trained on, having read why")
     parser.add_argument("--models", default=models.MODELS_DIR)
     parser.add_argument("--version", action="version",
                         version=f"vartrace {__version__}")
     args = parser.parse_args(argv)
 
-    variants, n_cells, skipped = io.read_all(args.files)
+    try:
+        variants, n_cells, skipped = io.read_all(args.files)
+    except io.UnknownFormat as problem:
+        sys.exit(str(problem))
     if not variants:
         sys.exit("no usable variants in the input")
 
-    model, why, scores, annotation = score(
-        variants, n_cells, args.models, not args.no_annotate)
+    try:
+        model, why, scores, annotation = score(
+            variants, n_cells, args.models, not args.no_annotate,
+            paths=args.files, anyway=args.anyway)
+    except Refused as refusal:
+        lines = ["These files are not what the models were trained on."]
+        for problem in refusal.problems:
+            lines += ["", problem["what"], "  -> " + problem["do"]]
+        lines += ["", "If you understand this and want the numbers anyway, "
+                      "run again with --anyway."]
+        sys.exit("\n".join(lines))
 
     report.write(args.output, report.rows(variants, scores, model, args.threshold))
     info = report.provenance(model, why, args.threshold, annotation)

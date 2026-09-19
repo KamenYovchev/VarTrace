@@ -18,6 +18,10 @@ from vartrace.variant import Variant
 
 BASES = {"A", "C", "G", "T"}
 
+# chromosome 1 is a different length in the two assemblies, so one header line
+# settles which one a VCF was called against
+CHR1_LENGTH = {248956422: "GRCh38", 249250621: "GRCh37"}
+
 # ANNOVAR column names, as used when the models were trained
 DBSNP_COL = "avsnp150"
 COSMIC_COL = "cosmic104"
@@ -25,8 +29,42 @@ REDI_COL = "rediportal"
 GNOMAD_COL = "AF"
 
 
+class UnknownFormat(ValueError):
+    """The file is a table, but not one this tool knows how to read."""
+
+
 def is_snv(ref, alt):
-    return ref in BASES and alt in BASES
+    # some callers write soft-masked positions in lower case, and those are
+    # ordinary substitutions rather than something to throw away
+    return ref.upper() in BASES and alt.upper() in BASES
+
+
+def genome_build(path):
+    """Which assembly a VCF was called against, or None if it cannot be told.
+
+    The models and the Ensembl lookup both work on GRCh38. Variants given on
+    GRCh37 sit at positions that mean something else, and the whole run comes
+    out quietly wrong, so it is worth saying which one arrived. An ANNOVAR
+    table carries no header and leaves the question open; None says so rather
+    than guessing.
+    """
+    if looks_annotated(path):
+        return None
+    with open(path) as fh:
+        for line in fh:
+            if not line.startswith("##"):
+                break
+            if not line.startswith("##contig="):
+                continue
+            fields = dict(part.split("=", 1) for part in
+                          line.strip().rstrip(">")[len("##contig=<"):].split(",")
+                          if "=" in part)
+            if fields.get("ID") in ("1", "chr1"):
+                try:
+                    return CHR1_LENGTH.get(int(fields.get("length", 0)))
+                except ValueError:
+                    return None
+    return None
 
 
 def cell_name(path):
@@ -70,6 +108,9 @@ def read_vcf(path):
             if not is_snv(ref, alt):
                 skipped += 1
                 continue
+            # upper case from here on, so the substitution features and the
+            # Ensembl queries see one spelling and not two
+            ref, alt = ref.upper(), alt.upper()
             for i, value in enumerate(c[9:]):
                 if len(samples) > 1:
                     if not carries(fmt, value):
@@ -112,6 +153,7 @@ def read_annovar(path):
             if not is_snv(ref, alt):
                 skipped += 1
                 continue
+            ref, alt = ref.upper(), alt.upper()
             variants.append(Variant(
                 cell=cell,
                 chrom=c[idx["Otherinfo1"]],
@@ -140,6 +182,15 @@ def looks_annotated(path):
 def read(path):
     if looks_annotated(path):
         return read_annovar(path)
+    with open(path) as fh:
+        first = fh.readline()
+    # a VCF starts with its header; a first line of plain columns means some
+    # other annotator's table, which would otherwise be read as an empty VCF
+    if first and not first.startswith("#"):
+        raise UnknownFormat(
+            f"{os.path.basename(path)} looks like a table, but not one from "
+            "ANNOVAR. Tables from other annotators are not read. Export a VCF "
+            "from them instead, which works whoever made it.")
     return read_vcf(path)
 
 

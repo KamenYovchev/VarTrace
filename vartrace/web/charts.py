@@ -4,6 +4,20 @@ import altair as alt
 import numpy as np
 import pandas as pd
 
+# The two calls keep the same colour in every plot, so the eye does not have to
+# relearn them from one chart to the next. They live here rather than in the
+# page because the plots are what give them meaning.
+ABSENT = "absent from the genome"
+PRESENT = "in the genome"
+GREEN = "#4E9A63"
+BLUE = "#6E93B8"
+
+
+def by_call():
+    return alt.Color("call:N", title=None,
+                     scale=alt.Scale(domain=[ABSENT, PRESENT],
+                                     range=[GREEN, BLUE]))
+
 
 def chromosome_order(name):
     body = name[3:] if name.startswith("chr") else name
@@ -18,7 +32,7 @@ def spectrum(table):
     return alt.Chart(counts).mark_bar().encode(
         x=alt.X("substitution:N", title=None),
         y=alt.Y("percent:Q", title="percent of class"),
-        color=alt.Color("call:N", title=None),
+        color=by_call(),
         xOffset="call:N",
         tooltip=["substitution", "call", "n",
                  alt.Tooltip("percent:Q", format=".1f")],
@@ -30,7 +44,7 @@ def vaf_against_score(table, threshold):
     points = alt.Chart(table).mark_circle(size=28, opacity=0.5).encode(
         x=alt.X("vaf:Q", title="allele fraction", scale=alt.Scale(domain=[0, 1])),
         y=alt.Y("score:Q", title="score", scale=alt.Scale(domain=[0, 1])),
-        color=alt.Color("call:N", title=None),
+        color=by_call(),
         tooltip=["cell", "chrom", "pos", "substitution", "vaf", "score"],
     )
     line = alt.Chart(pd.DataFrame({"y": [threshold]})).mark_rule(
@@ -42,7 +56,7 @@ def score_histogram(table):
     counts, edges = np.histogram(table["score"], bins=20, range=(0, 1))
     data = pd.DataFrame({"score": np.round(edges[:-1] + 0.025, 3),
                          "variants": counts})
-    return alt.Chart(data).mark_bar().encode(
+    return alt.Chart(data).mark_bar(color=GREEN).encode(
         x=alt.X("score:Q", title="score"),
         y=alt.Y("variants:Q", title="variants"),
     ).properties(height=260)

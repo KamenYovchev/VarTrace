@@ -98,19 +98,31 @@ def rs_id(entry):
     return "."
 
 
-def release(session):
-    try:
-        r = session.get(f"{SERVER}/info/software", headers=HEADERS, timeout=15)
-        if r.status_code == 200:
-            return str(r.json().get("release", "unknown"))
-    except requests.RequestException:
-        pass
+def release(session, attempts=3):
+    """Which Ensembl release answered, asked before the batches start.
+
+    The release is the whole point of the provenance line, because the gnomAD
+    frequencies differ between them. Asked after several hundred requests the
+    service tends to refuse it, so it is asked first and retried.
+    """
+    wait = 2
+    for attempt in range(attempts):
+        try:
+            r = session.get(f"{SERVER}/info/software",
+                            headers={"Accept": "application/json"}, timeout=15)
+            if r.status_code == 200:
+                return str(r.json().get("release", "unknown"))
+        except requests.RequestException:
+            pass
+        time.sleep(wait)
+        wait *= 2
     return "unknown"
 
 
 def annotate(variants, batch=BATCH, progress=None):
     """Adds dbSNP and gnomAD to every variant and says what answered."""
     session = requests.Session()
+    which_release = release(session)
     answers = {}
     for start in range(0, len(variants), batch):
         chunk = variants[start:start + batch]
@@ -138,7 +150,7 @@ def annotate(variants, batch=BATCH, progress=None):
     return {
         "source": "Ensembl VEP",
         "server": SERVER,
-        "release": release(session),
+        "release": which_release,
         "queried": len(variants),
         "with_a_record": found,
     }

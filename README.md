@@ -20,9 +20,22 @@ variants scored that way, about 87 really are absent from the genome.
 
 ## Installing
 
+One line, and it does not matter whether you have Python:
+
+    curl -LsSf https://codeberg.org/KamenYovchev/vartrace/raw/branch/main/install.sh | sh
+
+Then vartrace opens the interface in your browser. The installer uses
+whatever you already have and fetches a Python of its own only if you have
+none. Read it first if you would rather: it is a short file and it is in this
+repository.
+
+On Windows, run the same line inside WSL.
+
+If you keep your own Python environments, the ordinary route works too:
+
     pipx install vartrace
 
-Or, for the latest state of the source:
+or, for the latest state of the source:
 
     pipx install "git+https://codeberg.org/KamenYovchev/vartrace.git"
 
@@ -66,10 +79,50 @@ Only biallelic single base substitutions are used, because that is what the
 models were trained on. Anything else is counted and skipped, and the count is
 reported.
 
-If the input carries no database annotation, VarTrace looks up dbSNP and gnomAD
-through the public Ensembl service. That needs an internet connection and can be
-switched off. Of the five database features these two carry nearly all of the
-weight, which is why the other two are used when present but never fetched.
+
+## Where the database features come from
+
+Only two things reach the models: the columns ANNOVAR writes, or the answers
+Ensembl gives. Nothing else is read, and that is deliberate.
+
+A VCF is a standard, so the nine fixed columns survive whoever touched the file
+last. An annotator adds its own fields to INFO and leaves the rest alone. VEP
+writes CSQ, SnpEff writes ANN, VarSeq writes its own; VarTrace reads none of
+them. Such a file is read as the plain VCF it still is, its annotation passed
+over, and dbSNP and gnomAD fetched from Ensembl instead. The result is the same
+as for a file that was never annotated at all.
+
+A table is not a standard, and every tool invents its own columns. The one from
+ANNOVAR is read because the VCF fields survive in its Otherinfo columns. A
+table from any other annotator is refused with a message saying to export a VCF
+instead, which is one step in all of them and keeps more, not less: most such
+tables drop the read-level INFO fields and the sample column, so the variants
+would fail the checks below anyway.
+
+Fetching from Ensembl needs an internet connection and can be switched off. Of
+the five database features, dbSNP and gnomAD carry nearly all of the weight,
+which is why REDIportal and COSMIC are used when present but never fetched.
+
+The two sources were compared on the labelled data behind the models, all 12,916
+rows. Taking dbSNP and gnomAD from Ensembl rather than from ANNOVAR cost 0.0009
+PR-AUC and changed the call at 0.5 for 0.87 percent of variants, even though the
+gnomAD frequencies themselves differed by more than 0.1 for 464 of them. That
+measurement is on the cell lines the models were trained on and says the two
+sources are interchangeable; it does not say what either would score on data
+from somewhere else.
+
+
+## What is checked before anything is scored
+
+VarTrace reads the files, says what it found, and stops rather than score an
+input that would produce ordinary looking numbers meaning something else. It
+checks the assembly from the contig lengths, whether the read-level INFO fields
+are there, whether there is an allele fraction, and whether the depth reaches 5.
+Each refusal says what to do about it, and --anyway overrides them all.
+
+Four things leave no trace in a VCF and cannot be checked: whether the reads
+came from single cells or from bulk, the sequencing chemistry, the tissue, and
+the aligner. Those are stated in the instructions instead.
 
 
 ## Output
