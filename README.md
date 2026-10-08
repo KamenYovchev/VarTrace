@@ -165,6 +165,12 @@ the frequencies from Ensembl instead, the release may differ; which one answered
 is recorded in the output.
 
 
+## Analysis pipeline
+
+The scripts behind the thesis, from the raw reads to the trained models, are in
+pipeline/. See pipeline/README.md for the order and the settings.
+
+
 ## Licence
 
 Code: PolyForm Noncommercial License 1.0.0, see LICENSE.
