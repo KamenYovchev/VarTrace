@@ -296,11 +296,11 @@ Any VCF, Ensembl switched off
 """
 
 MODEL_TABLE = pd.DataFrame([
-    ("database-informed, with cross-cell", 35, "0.9702"),
-    ("database-informed, no cross-cell", 31, "0.9641"),
-    ("partial annotation", 35, "0.9489 to 0.9700"),
-    ("data-only, with cross-cell", 30, "0.8907"),
-    ("data-only, no cross-cell", 26, "0.7854"),
+    ("database-informed, with cross-cell", 35, "0.9874"),
+    ("database-informed, no cross-cell", 31, "0.9834"),
+    ("partial annotation", 35, "0.9676 to 0.9864"),
+    ("data-only, with cross-cell", 30, "0.8996"),
+    ("data-only, no cross-cell", 26, "0.7797"),
 ], columns=["model", "features", "PR-AUC"])
 
 STATS = [
@@ -337,27 +337,34 @@ STATS = [
                 "healthy reference genomes, and MOLM13, a line from acute "
                 "myeloid leukaemia.",
         "body": [
-            "12,916 labelled rows over 6,317 distinct variants, of which 41.7 "
+            "12,916 labelled rows over 6,317 distinct variants, of which 38.2 "
             "percent arose at the RNA level.",
             "The truth comes from sequencing the DNA of the same cell. A "
             "variant found in the DNA too is DNA_origin. One absent from the "
             "DNA, where the DNA was covered at least five times and read as "
             "reference, is RNA_only. Where the coverage did not reach, the "
             "variant was left out rather than guessed at.",
+            "Amplifying the DNA of one cell sometimes loses one of the two "
+            "copies, and an inherited variant on the lost copy then looks "
+            "RNA_only. Such labels were found by checking against DNA that "
+            "was not amplified from a single cell: the Genome in a Bottle "
+            "truth sets for HG001 and HG002 and bulk genome sequencing of "
+            "MOLM13. 461 of them were corrected to DNA_origin before "
+            "training.",
         ],
     },
     {
-        "number": "0.97", "label": "PR-AUC",
-        "lead": "0.9702, cross-validated with the folds grouped by variant, "
+        "number": "0.99", "label": "PR-AUC",
+        "lead": "0.9874, cross-validated with the folds grouped by variant, "
                 "so no variant appears in both training and testing. Measured "
                 "with all four databases present and more than one cell, "
                 "which is the best case.",
         "body": [
-            "PR-AUC rather than ROC-AUC because the classes are uneven. 41.7 "
+            "PR-AUC rather than ROC-AUC because the classes are uneven. 38.2 "
             "percent of the data arose at the RNA level, and that prevalence "
             "is what a model knowing nothing would score.",
-            "The matching precision is 0.9646 at a threshold of 0.5 and "
-            "0.9919 at 0.867, which is where the high confidence setting "
+            "The matching precision is 0.9711 at a threshold of 0.5 and "
+            "0.9909 at 0.867, which is where the high confidence setting "
             "comes from.",
             "These figures are from the three cell lines above. What the "
             "models would score on primary tissue or another technology is "
@@ -716,8 +723,8 @@ if not started:
             if not use_ensembl:
                 st.warning("Switched off, a VCF is scored with no database "
                            "features at all. That is the weakest of the five "
-                           "models: 0.89 PR-AUC with several cells and 0.79 "
-                           "with one, against 0.97 when the databases are "
+                           "models: 0.90 PR-AUC with several cells and 0.78 "
+                           "with one, against 0.99 when the databases are "
                            "there. An ANNOVAR table is unaffected.")
 
 if not started and not uploaded:

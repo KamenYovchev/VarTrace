@@ -45,16 +45,17 @@
       "hg002",
       "molm13"
     ],
-    "prevalence_rna_only": 0.4172
+    "prevalence_rna_only": 0.3815
   },
   "metrics_cv_by_variant": {
-    "roc_auc": 0.8374,
-    "pr_auc": 0.7854,
-    "precision": 0.7223,
-    "recall": 0.6946,
-    "f1": 0.7082,
-    "accuracy": 0.7611,
-    "prevalence": 0.4172
+    "roc_auc": 0.8551,
+    "pr_auc": 0.7797,
+    "precision": 0.7176,
+    "recall": 0.6893,
+    "f1": 0.7032,
+    "accuracy": 0.7779,
+    "prevalence": 0.3815
   },
-  "date": "2026-08-27"
+  "date": "2026-10-08",
+  "labels": "RNA_only labels checked against DNA not amplified from a single cell: GIAB v4.2.1 GRCh38 benchmark (HG001, HG002, confident regions) and bulk WGS SRR17524983 (MOLM13). 461 rows contradicted by it (HG001 160, HG002 158, MOLM13 143) relabelled DNA_origin before training."
 }
