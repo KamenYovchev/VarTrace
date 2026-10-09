@@ -13,6 +13,9 @@ COSMIC="$ROOT/cosmic"             # COSMIC v104, needs a licence
 CONDA_BASE="${CONDA_BASE:-/opt/miniforge3}"
 ENVS="${ENVS:-$ROOT/conda/envs}"
 
+# rclone for the bucket downloads and for serving BAMs over http
+RCLONE="${RCLONE:-$ENVS/rclone/bin/rclone}"
+
 # Public BioSkryb demo data. The keys are not here, set BIOSKRYB_KEY and
 # BIOSKRYB_SECRET in the environment.
 BIOSKRYB_ENDPOINT="${BIOSKRYB_ENDPOINT:-s3.us-east-1.wasabisys.com}"
@@ -26,4 +29,4 @@ GPUS="${GPUS:-1 2 3 4}"
 HG002_DIR="${HG002_DIR:-$ROOT/hg002_reprocess}"
 
 export ROOT DATA RESULTS REFERENCE ANNOVAR COSMIC CONDA_BASE ENVS
-export BIOSKRYB_ENDPOINT BIOSKRYB_REGION BIOSKRYB_DATA HG002_DIR GPUS
+export BIOSKRYB_ENDPOINT BIOSKRYB_REGION BIOSKRYB_DATA HG002_DIR GPUS RCLONE

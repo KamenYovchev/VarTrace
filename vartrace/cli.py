@@ -73,8 +73,8 @@ def check(paths, variants):
     if shallow > MOST * n:
         problems.append({
             "what": f"{shallow} of {n} variants are covered by fewer than 5 "
-                    "reads. Everything below 5 was removed from the training "
-                    "data, so these sit outside what the models have seen.",
+                    "reads. The training data has few variants below 5, so "
+                    "these sit at the edge of what the models have seen.",
             "do": "Filter them out first: bcftools view -e 'FMT/DP<5'.",
         })
 
@@ -224,7 +224,7 @@ def run(argv):
     except Refused as refusal:
         lines = ["These files are not what the models were trained on."]
         for problem in refusal.problems:
-            lines += ["", problem["what"], "  -> " + problem["do"]]
+            lines += ["", problem["what"], "  what to do: " + problem["do"]]
         lines += ["", "If you understand this and want the numbers anyway, "
                       "run again with --anyway."]
         sys.exit("\n".join(lines))

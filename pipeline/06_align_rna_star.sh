@@ -26,8 +26,7 @@ find "$TRIM" -name "*_R1.trim.fastq.gz" | sort | while read r1; do
   r2="${r1/_R1.trim/_R2.trim}"
   base=$(basename "$r1" | sed 's/_R1.trim.fastq.gz//')
   grp=$(echo "$r1" | grep -oE 'molm13|hg002|hg001')
-  # resume: skip cells that already have a finished BAM (added 2026-08-15 so new cells
-  # can be aligned without overwriting the already-validated old ones)
+  # skip cells that already have a finished BAM
   if [ -s "$OUT/$grp/$base/Aligned.sortedByCoord.out.bam" ]; then
     echo ">>> skip (done): $grp / $base"
     continue

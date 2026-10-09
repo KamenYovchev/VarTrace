@@ -6,7 +6,7 @@ source ${CONDA_BASE}/etc/profile.d/conda.sh
 conda activate annotation
 
 IN=${ROOT}/results/rna_annotated
-DNADIR=${ROOT}/singlecell_data
+DNADIR=$DATA
 OUT=${ROOT}/results/rna_dna_intersect
 mkdir -p "$OUT"
 
@@ -20,9 +20,12 @@ for f in "$IN"/*.hg38_multianno.txt; do
   elif [[ "$base" == ResolveOMEv2.1* ]]; then
     dbase="$(echo "$base" | sed 's/RNA/DNA/; s/_S1_L001//')_deepvariant"
     dna="$DNADIR/hg001/dna_vcf/google-deepvariant_1.8.0_ptamodel/${dbase}.vcf.gz"
+  elif [[ "$base" == *NA12878* ]]; then
+    dbase="$(echo "$base" | sed 's/^RNA/DNA/; s/NA12878-RNA-/NA12878-/; s/_S1_L001//')_deepvariant"
+    dna="$DNADIR/hg001_v1/dna_vcf/${dbase}.vcf.gz"
   elif [[ "$base" == ResolveOMEv2.0-384* ]]; then
-    dbase="$(echo "$base" | sed 's/RNA-QC/WGS/')_dnascope"
-    dna="$DNADIR/hg002/dna_vcf/${dbase}.vcf.gz"
+    dbase="$(echo "$base" | sed 's/RNA-QC/WGS/')_deepvariant"
+    dna="$HG002_DIR/vcf_ptamodel/${dbase}.vcf.gz"
   else
     echo ">>> warn no DNA mapping for $base"; continue
   fi

@@ -91,9 +91,9 @@ Label check against DNA not amplified from a single cell:
  45  45_measure_effect_of_label_noise.py     effect of the noise on the numbers
  46  46_make_thesis_figures.py               figures of the results chapter
 
-The VarTrace 0.3.0 models are steps 27, 28 and 29 run on the table from step 44.
+The VarTrace models from version 0.3.0 on are steps 27, 28 and 29 run on the table from step 44.
 Arguments are at the top of each file.
 TXT
 fi
 
-[ "$list" = "1" ] || echo ">>> done"
+[ "$LIST" = "1" ] || echo ">>> done"

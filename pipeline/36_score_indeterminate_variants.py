@@ -132,7 +132,7 @@ for f in sorted(glob.glob(os.path.join(labeled_dir, "*.labeled.tsv"))):
                              base=[ref_ct, alt_ct, vaf, dp, qual, gq],
                              rl=rl, sc=sc, db=db, vkey=vkey))
 
-# Cross-cell over all rows, exactly as 21_build_feature_table.py aggregates
+# Cross-cell over all rows, including the indeterminate ones
 recs = []
 for r in rows:
     vs_all = var_vafs[r["vkey"]]

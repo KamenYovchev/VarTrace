@@ -116,9 +116,11 @@ from somewhere else.
 
 VarTrace reads the files, says what it found, and stops rather than score an
 input that would produce ordinary looking numbers meaning something else. It
-checks the assembly from the contig lengths, whether the read-level INFO fields
-are there, whether there is an allele fraction, and whether the depth reaches 5.
-Each refusal says what to do about it, and --anyway overrides them all.
+checks the assembly from the length of chr1 in the header and refuses GRCh37.
+It also checks whether the read-level INFO fields are there, whether there is an
+allele fraction, and whether the depth reaches 5; these three refuse when more
+than a fifth of the variants fail. Each refusal says what to do about it, and
+--anyway overrides them all.
 
 Four things leave no trace in a VCF and cannot be checked: whether the reads
 came from single cells or from bulk, the sequencing chemistry, the tissue, and

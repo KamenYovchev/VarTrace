@@ -5,7 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 source ${CONDA_BASE}/etc/profile.d/conda.sh
 conda activate variant-calling
 
-IN=${ROOT}/results/rna_step6_mainchr
+IN=${ROOT}/results/rna_mainchr
 OUT=${ROOT}/results/rna_qc_filtered
 mkdir -p "$OUT"
 SUM=${ROOT}/results/rna_qc_filter_summary.tsv
@@ -17,7 +17,7 @@ EXPR='FMT/DP>=3 && FMT/AD[0:1]>=3 && FMT/GQ>=30 && INFO/QD>=2 && INFO/MQ>=50 && 
 for f in "$IN"/*.vcf.gz; do
   base=$(basename "$f" .mainchr.vcf.gz)
   out="$OUT/${base}.qc.vcf.gz"
-  # resume (added 2026-08-15): skip already-filtered cells; criteria unchanged
+  # skip cells already filtered
   if [ -s "$out" ]; then echo "skip (done): $base"; continue; fi
   bcftools view -f PASS "$f" -Ou 2>/dev/null \
     | bcftools view -i "$EXPR" -Oz -o "$out" 2>/dev/null
@@ -28,5 +28,5 @@ for f in "$IN"/*.vcf.gz; do
   echo "$base: $b -> $a"
 done
 echo ""
-echo ">>> done. Filtered VCFs in $out. Summary: $sum"
+echo ">>> done. Filtered VCFs in $OUT. Summary: $SUM"
 column -t "$SUM"

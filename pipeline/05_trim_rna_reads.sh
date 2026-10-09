@@ -1,12 +1,12 @@
 #!/bin/bash
-# Trim the single-cell RNA reads with fastp.
+# Trim the single-cell RNA reads with fastp and write the quality reports.
 source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 
 source ${CONDA_BASE}/etc/profile.d/conda.sh
 conda activate read-qc
 
-# data can be overridden to restrict the run to a subset, e.g.
-DATA=${DATA:-${ROOT}/singlecell_data}
+# all cells under $DATA, including the HG001 v1.0 cells; set DATA to a
+# subfolder to run only some of them
 OUT=${ROOT}/results/trimmed
 
 find "$DATA" -path "*rna_fastq*" -name "*_R1_001.fastq.gz" | sort | while read r1; do
@@ -26,3 +26,11 @@ find "$DATA" -path "*rna_fastq*" -name "*_R1_001.fastq.gz" | sort | while read r
     --html "$OUT/$grp/${base}.fastp.html" \
     --json "$OUT/$grp/${base}.fastp.json"
 done
+
+# quality reports: FastQC on the raw reads, MultiQC over FastQC and fastp
+QC=${ROOT}/results/qc
+mkdir -p "$QC/fastqc_raw"
+find "$DATA" -path "*rna_fastq*" -name "*.fastq.gz" | sort \
+  | xargs fastqc -t 8 -o "$QC/fastqc_raw"
+multiqc -f "$QC/fastqc_raw" -o "$QC" -n multiqc_raw
+multiqc -f "$OUT" -o "$QC" -n multiqc_trimmed

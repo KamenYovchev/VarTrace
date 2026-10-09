@@ -66,7 +66,7 @@ for k, v in zip(agg_key, variant_id):
 bad_v = {k: vs for k, vs in k2v.items() if len(vs) > 1}
 log("1a. aggregation key -> variant_id must be many-to-one")
 log("    aggregation keys mapping to >1 variant: %d  %s"
-    % (len(bad_v), "OK" if not bad_v else "*** FAIL ***"))
+    % (len(bad_v), "OK" if not bad_v else "FAIL"))
 
 # 1b.
 k2l = defaultdict(set)
@@ -75,7 +75,7 @@ for k, g in zip(agg_key, groups_line):
 bad_l = {k: gs for k, gs in k2l.items() if len(gs) > 1}
 log("1b. aggregation key -> cell line must be many-to-one")
 log("    aggregation keys spanning >1 cell line: %d  %s"
-    % (len(bad_l), "OK" if not bad_l else "*** FAIL ***"))
+    % (len(bad_l), "OK" if not bad_l else "FAIL"))
 log()
 
 # 1c.
@@ -88,7 +88,7 @@ for i, (itr, ite) in enumerate(gkf.split(df[ALL].values, y, groups=variant_id), 
     log("    fold %d: n_train=%-6d n_test=%-6d shared agg keys=%d  shared variants=%d"
         % (i, len(itr), len(ite), len(shared), len(v_shared)))
 log("    total shared across folds: %d  %s"
-    % (tot_shared, "OK" if tot_shared == 0 else "*** FAIL ***"))
+    % (tot_shared, "OK" if tot_shared == 0 else "FAIL"))
 log()
 
 # 1d.
@@ -126,7 +126,7 @@ for name, rec in [("n_cells_variant", rec_n), ("frac_cells", rec_frac),
     both_nan = np.isnan(stored) & np.isnan(r)
     close = np.isclose(stored, r, rtol=0, atol=1e-3, equal_nan=False) | both_nan
     log("    %-16s identical in %d/%d rows  %s"
-        % (name, close.sum(), len(df), "OK" if close.all() else "*** MISMATCH ***"))
+        % (name, close.sum(), len(df), "OK" if close.all() else "MISMATCH"))
 log()
 
 

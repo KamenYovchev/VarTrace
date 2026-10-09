@@ -1,8 +1,8 @@
 """Is annotation fetched from Ensembl as good as annotation done with ANNOVAR?
 
 The models were trained on the database columns ANNOVAR writes. A user with no
-ANNOVAR gets dbSNP and gnomAD from Ensembl instead, and until now nothing had
-checked that the two agree. The labelled tables say which variants really are
+ANNOVAR gets dbSNP and gnomAD from Ensembl instead, and this checks that the two
+agree. The labelled tables say which variants really are
 absent from the genome, so the question can be settled on the result and not
 only on how far the values drift.
 
@@ -19,10 +19,8 @@ withheld databases were worth in the first place.
 
 The answers from Ensembl are read from the file fetch_ensembl.py wrote.
 
-    PYTHONPATH=/data/vartrace /data/conda/envs/ml-cpu/bin/python \\
-        /data/vartrace/tests/compare_annotation_sources.py \\
-        /data/results/step9_labeled_bamfix /data/results/model_dataset_sig.csv \\
-        /data/results/ensembl_answers.tsv
+    PYTHONPATH=. python tests/compare_annotation_sources.py \\
+        <labelled_dir> <model_dataset_sig.csv> <ensembl_answers.tsv>
 
 One caveat on the numbers. These variants are the ones the models were trained
 on, so the figures here are higher than the cross-validated ones in the model

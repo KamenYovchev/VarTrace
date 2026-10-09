@@ -45,4 +45,4 @@ if [ ! -s vcf/${S}_deepvariant.vcf.gz ]; then
     > logs/$S.deepvariant.log 2>&1 || { echo "!!! deepvariant"; exit 1; }
   rm -rf tmp/$S
 fi
-echo "done: $base/vcf/${S}_deepvariant.vcf.gz"
+echo "done: $BASE/vcf/${S}_deepvariant.vcf.gz"

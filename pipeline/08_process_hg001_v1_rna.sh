@@ -97,6 +97,6 @@ for bam in "$ALIGN"/RNA-OME-Manuscript-NA12878-*/Aligned.sortedByCoord.out.bam; 
 done
 
 echo "all done ($(date))"
-echo "trimmed: $(ls "$TRIM"/RNA-ome-Manuscript-NA12878-*.trim.fastq.gz 2>/dev/null | wc -l) / 20"
-echo "aligned: $(ls -d "$ALIGN"/RNA-ome-Manuscript-NA12878-*/ 2>/dev/null | wc -l) / 10"
-echo "vcf    : $(ls "$OUT"/RNA-ome-Manuscript-NA12878-*/*.filtered.vcf.gz 2>/dev/null | wc -l) / 10"
+echo "trimmed: $(ls "$TRIM"/RNA-OME-Manuscript-NA12878-*.trim.fastq.gz 2>/dev/null | wc -l) / 20"
+echo "aligned: $(ls -d "$ALIGN"/RNA-OME-Manuscript-NA12878-*/ 2>/dev/null | wc -l) / 10"
+echo "vcf    : $(ls "$OUT"/RNA-OME-Manuscript-NA12878-*/*.filtered.vcf.gz 2>/dev/null | wc -l) / 10"

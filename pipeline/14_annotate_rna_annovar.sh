@@ -16,8 +16,7 @@ OP="g,r,f,f,f,f,f,f,f"
 
 for f in "$IN"/*.qc.vcf.gz; do
   base=$(basename "$f" .qc.vcf.gz)
-  # resume (added 2026-08-15): annotation takes hours per batch, so skip cells already
-  # annotated.
+  # annotation takes hours, so skip cells already annotated
   if [ -s "$OUT/${base}.hg38_multianno.txt" ]; then
     echo ">>> skip (done): $base"; continue
   fi
@@ -25,16 +24,16 @@ for f in "$IN"/*.qc.vcf.gz; do
   # VCF, then avinput; strip leading 'chr' from chrom (col 1) to match ANNOVAR dbs
   perl "$ANNOVAR/convert2annovar.pl" -format vcf4 -includeinfo "$f" 2>/dev/null \
     | sed 's/^chr//' > "$OUT/$base.avinput"
-  # annotate with all 7 databases
+  # annotate with the nine databases in PROTO
   perl "$ANNOVAR/table_annovar.pl" "$OUT/$base.avinput" "$HUMANDB/" \
     -buildver hg38 -out "$OUT/$base" -remove \
     -protocol "$PROTO" -operation "$OP" \
-    -nastring . -otherinfo > "$out/$base.annovar.log" 2>&1
+    -nastring . -otherinfo > "$OUT/$base.annovar.log" 2>&1
   if [ -f "$OUT/${base}.hg38_multianno.txt" ]; then
     n=$(( $(wc -l < "$OUT/${base}.hg38_multianno.txt") - 1 ))
     echo ">>> done $base : $n annotated variants ($(date))"
   else
-    echo ">>> warn failed $base (see $out/$base.annovar.log)"
+    echo ">>> warn failed $base (see $OUT/$base.annovar.log)"
   fi
 done
 echo ">>> All annotation done ($(date))"

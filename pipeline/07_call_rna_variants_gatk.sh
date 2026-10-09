@@ -19,7 +19,7 @@ fi
 DICT="${REF%.fa}.dict"
 if [ ! -f "$DICT" ]; then
   echo ">>> CreateSequenceDictionary ($(date))"
-  gatk CreateSequenceDictionary -R "$REF" -O "$dict" || { echo ">>> dict failed"; exit 1; }
+  gatk CreateSequenceDictionary -R "$REF" -O "$DICT" || { echo ">>> dict failed"; exit 1; }
 fi
 
 # 1) Process every aligned cell.

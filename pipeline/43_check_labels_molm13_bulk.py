@@ -90,4 +90,6 @@ r = a.groupby("cell").wrong.mean()
 print("per cell, %d cells: min %.3f, median %.3f, max %.3f" % (len(r), r.min(), r.median(), r.max()))
 print("borderline among %d wrong variants: depth 10-14: %d, GQ below 20: %d"
       % (len(u), (u.bulk_dp < 15).sum(), (u.bulk_gq < 20).sum()))
+clear = u[(u.bulk_dp >= 15) & ~(u.bulk_gq < 20)]
+print("clear cases: %d, median depth %.0f" % (len(clear), clear.bulk_dp.median()))
 print("RNA_only not covered (depth < %d): %d" % (MIN_DP, ((df.label == "RNA_only") & ~df.covered).sum()))

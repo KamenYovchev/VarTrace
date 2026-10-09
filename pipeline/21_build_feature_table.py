@@ -26,8 +26,8 @@ def group_of(base):
         return "molm13"
     if base.startswith("ResolveOMEv2.1"):
         return "hg001"
-    # 10 additional HG001 cells (ResolveOME v1.0, added 2026-08-15): same donor NA12878
-    # as the v2.1 cells, so same group for cross-cell features.
+    # the 10 HG001 cells from ResolveOME v1.0, same donor, so same group for the
+    # cross-cell features
     if "NA12878" in base:
         return "hg001"
     if base.startswith("ResolveOMEv2.0-384"):

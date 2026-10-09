@@ -6,7 +6,7 @@ import os
 
 ROOT = os.environ.get("ROOT", "/data")
 IN = ROOT + "/results/rna_qc_filtered"
-OUT = ROOT + "/results/step8_signatures"
+OUT = ROOT + "/results/signatures"
 PC = os.path.join(OUT, "per_cell_input")
 PG = os.path.join(OUT, "per_group_input")
 os.makedirs(PC, exist_ok=True)
@@ -21,8 +21,7 @@ def group_of(base):
         return "molm13"
     if base.startswith("ResolveOMEv2.1"):
         return "hg001"
-    # 10 additional HG001 cells (ResolveOME v1.0, added 2026-08-15): same donor NA12878,
-    # so same group as the v2.1 cells.
+    # the 10 HG001 cells from ResolveOME v1.0, same donor as the v2.1 cells
     if "NA12878" in base:
         return "hg001"
     if base.startswith("ResolveOMEv2.0-384"):

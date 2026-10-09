@@ -89,4 +89,4 @@ for lane in $(seq 0 $((NL - 1))); do
 done
 wait
 echo "PTA-Model calling done ($(date))"
-echo "VCFs: $(ls "$OUT"/*.vcf.gz 2>/dev/null | wc -l) / 10  -> $out"
+echo "VCFs: $(ls "$OUT"/*.vcf.gz 2>/dev/null | wc -l) / 10  -> $OUT"

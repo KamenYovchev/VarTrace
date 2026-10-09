@@ -3,6 +3,7 @@
 #   export BIOSKRYB_KEY=...
 #   export BIOSKRYB_SECRET=...
 #   bash 01_download_dna_vcfs.sh
+source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
 set -euo pipefail
 
 : "${BIOSKRYB_KEY:?set BIOSKRYB_KEY}"
@@ -11,8 +12,13 @@ set -euo pipefail
 REMOTE=":s3,provider=Wasabi,access_key_id=${BIOSKRYB_KEY},secret_access_key=${BIOSKRYB_SECRET},endpoint=${BIOSKRYB_ENDPOINT},region=${BIOSKRYB_REGION},force_path_style=true:"
 BASE="$BIOSKRYB_DATA"
 
-mkdir -p dna_vcf/molm13 dna_vcf/hg002 dna_vcf/hg001
+# MOLM13 and HG001 come called with DeepVariant and the PTA model, as used for
+# the labels. HG002 comes called with Sentieon DNAscope and only lists variant
+# positions, so it is called again in steps 11 and 12; these files are kept for
+# the comparison.
+PTA=google-deepvariant_1.8.0_ptamodel
+mkdir -p "$DATA/molm13/dna_vcf/$PTA" "$DATA/hg001/dna_vcf/$PTA" "$DATA/hg002/dna_vcf"
 
-rclone copy "${REMOTE}${BASE}/ResolveOME_v1.0/manual/molm13/dna/vcf/google-deepvariant_1.8.0_ptamodel/" dna_vcf/molm13/ -P
-rclone copy "${REMOTE}${BASE}/ResolveOME_v2.0/automated/hg002/dna/vcf/sentieon-dnascope_202503.02_bioskryb129/" dna_vcf/hg002/ -P
-rclone copy "${REMOTE}${BASE}/ResolveOME_v2.1/manual/hg001/dna/vcf/google-deepvariant_1.8.0_ptamodel/" dna_vcf/hg001/ -P
+"$RCLONE" copy "${REMOTE}${BASE}/ResolveOME_v1.0/manual/molm13/dna/vcf/$PTA/" "$DATA/molm13/dna_vcf/$PTA/" -P
+"$RCLONE" copy "${REMOTE}${BASE}/ResolveOME_v2.1/manual/hg001/dna/vcf/$PTA/" "$DATA/hg001/dna_vcf/$PTA/" -P
+"$RCLONE" copy "${REMOTE}${BASE}/ResolveOME_v2.0/automated/hg002/dna/vcf/sentieon-dnascope_202503.02_bioskryb129/" "$DATA/hg002/dna_vcf/" -P

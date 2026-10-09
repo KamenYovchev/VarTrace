@@ -9,9 +9,7 @@ the order of the feature matrix, the imputer, and the choice of model.
 Run per cell line, because that is how the cross-cell features were computed
 during training.
 
-    PYTHONPATH=/data/vartrace /data/conda/envs/ml-cpu/bin/python \\
-        /data/vartrace/tests/check_scores.py \\
-        /data/results/step9_labeled_bamfix /data/results/model_dataset_sig.csv
+    PYTHONPATH=. python tests/check_scores.py <labelled_dir> <model_dataset_sig.csv> [models_dir]
 """
 
 import glob

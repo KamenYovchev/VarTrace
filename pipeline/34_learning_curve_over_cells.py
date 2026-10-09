@@ -151,7 +151,7 @@ if len(ks) >= 3:
         plt.errorbar(ks, mu, yerr=sd, marker="o", capsize=3, label=lbl)
     # labels in Bulgarian, the figure goes into the thesis
     plt.xlabel("брой клетки в обучението")
-    plt.ylabel("стойност (крос-валидация по вариант)")
+    plt.ylabel("стойност (кръстосана проверка по вариант)")
     plt.title("Крива на учене")
     plt.grid(alpha=0.3)
     plt.legend()

@@ -21,6 +21,9 @@ dependencies = [
     "altair",
 ]
 
+[project.urls]
+Source = "https://codeberg.org/KamenYovchev/vartrace"
+
 [project.scripts]
 vartrace = "vartrace.cli:main"
 

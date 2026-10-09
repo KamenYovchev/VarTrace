@@ -31,6 +31,7 @@ overridden from the environment:
     BIOSKRYB_DATA
     GPUS                 GPU ids for steps 11 to 13, one lane per GPU
     HG002_DIR            folder for the HG002 reprocessing and its containers
+    RCLONE               rclone binary, from the rclone environment by default
 
 Access keys are never stored in the scripts. Set them before running:
 
@@ -73,11 +74,12 @@ The DNA BAMs (about 540 GB) are not downloaded. They are read remotely in step 1
     03_download_annovar_databases.sh           refGene, avsnp150, gnomAD, dbNSFP, ClinVar
     04_download_cosmic.sh                      COSMIC v104, needs a licence
 
-REDIportal has no automatic download and is fetched by hand.
+REDIportal has no automatic download and is fetched by hand. COSMIC and
+REDIportal are converted to ANNOVAR tables by hand.
 
 ### 3. RNA reads
 
-    05_trim_rna_reads.sh                       trimming with fastp
+    05_trim_rna_reads.sh                       trimming with fastp, FastQC and MultiQC reports
     06_align_rna_star.sh                       STAR index if missing, two-pass alignment
     07_call_rna_variants_gatk.sh               MarkDuplicates, SplitNCigarReads, HaplotypeCaller, VariantFiltration
     08_process_hg001_v1_rna.sh                 the same three steps for the HG001 v1.0 cells
@@ -117,14 +119,16 @@ The chr prefix is removed for ANNOVAR, its databases use 1, 2 and so on.
     17_label_variants_by_origin.sh / .py       label by the DNA of the same cell
     18_rescue_undetermined_from_bam.sh / .py   recheck variants without a DNA record in the BAM
 
-A variant found in the DNA is DNA_origin. A variant not in the DNA, where the
-DNA covers the position with at least five reads that all show the reference
-allele, is RNA_only. Anything else is indeterminate and left out.
+A variant found in the DNA (same alternative allele, non-reference genotype) is
+DNA_origin. A variant not in the DNA, where the DNA covers the position with at
+least five reads, is RNA_only. Reads are not counted for the alternative allele;
+the rule relies on DeepVariant not having called it. Anything else is
+indeterminate and left out.
 
 Step 18 is needed because callers only write positions with a variant. It reads
 the depth straight from the DNA BAMs through their index, a few kilobytes per
-position. For HG002 the BAMs from step 11 are served locally over http, set
-HG002_BAM_URL if the address differs.
+position. For HG002 the BAMs from step 11 in $HG002_DIR/bam are served locally
+over http by the same script; set HG002_BAM_URL to use another address.
 
 ### 9. Mutational signatures
 
@@ -190,6 +194,19 @@ because the figures are in the thesis.
 
 ## Not included
 
-The raw reads, which are public at BioSkryb and fetched in step 1. The
-reference databases: ANNOVAR fetches its own, COSMIC needs a licence and
-REDIportal is downloaded by hand. The trained models, which ship with VarTrace.
+Things that are placed by hand before step 5, because no script downloads them:
+
+    RNA reads of MOLM13, HG001 v2.1 and HG002     $DATA/<line>/rna_fastq/
+    HG002 DNA reads                               $HG002_DIR/fastq/
+    GRCh38 primary assembly and GENCODE 49        $REFERENCE/
+    GRCh38 from the GATK bundle (3366 contigs)    $HG002_DIR/ref_bioskryb/
+    DeepVariant PTA model and population VCFs     $HG002_DIR/ptamodel/
+    containers: Parabricks 4.4.0, DeepVariant 1.8.0, BWA, samtools
+
+The reads are the public BioSkryb ResolveOME demo data. Step 2 downloads the
+RNA reads of the 10 HG001 v1.0 cells.
+
+The reference databases: step 3 fetches the ANNOVAR ones. COSMIC v104 needs a
+licence (step 4) and has to be converted to the ANNOVAR format hg38_cosmic104
+by hand, as does REDIportal (hg38_rediportal). The trained models ship with
+VarTrace.

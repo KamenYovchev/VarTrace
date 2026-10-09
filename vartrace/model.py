@@ -1,8 +1,8 @@
 """Loading the models and choosing between them.
 
 The choice is made by what the input can support, not by anything the user has
-to declare. What each model needs is read from its own description, so a new
-model can be added without touching this file.
+to declare. What each model needs is read from its own description, and the
+feature groups are listed here.
 """
 
 import glob

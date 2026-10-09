@@ -216,9 +216,10 @@ REQUIREMENTS = [
         "checked": True,
         "status": "Checked. VarTrace refuses when too many are shallower.",
         "body": [
-            "Positions covered by fewer than five reads were removed from the "
-            "training data, so the models have never seen one. Filter yours "
-            "the same way:",
+            "The training data has no variant under 4 reads and few at 4 "
+            "(651 of 12,916 rows), because the quality filter asks for depth "
+            "3 and at least 3 reads with the alternative allele. Below 5 the "
+            "models have seen little, so filter yours like this:",
         ],
         "command": "bcftools view -e 'FMT/DP<5' in.vcf -o out.vcf",
         "after": "A few shallow variants are tolerated. The run stops when "
@@ -262,21 +263,40 @@ ACCEPTED = """
 """
 
 PREPARING = """\
-# 1. align the single-cell RNA reads to GRCh38
-STAR --genomeDir GRCh38 --readFilesIn cell_01_R1.fq.gz cell_01_R2.fq.gz
+# the same steps as the training data, see pipeline/ in the repository
 
-# 2. call the variants with GATK, which writes the seven read-level fields
-gatk HaplotypeCaller -R GRCh38.fa -I cell_01.bam -O cell_01.vcf
+# 1. trim and align the single-cell RNA reads to GRCh38, two-pass
+fastp -i cell_01_R1.fq.gz -I cell_01_R2.fq.gz -o r1.fq.gz -O r2.fq.gz \\
+  --detect_adapter_for_pe --qualified_quality_phred 20 --length_required 25
+STAR --genomeDir GRCh38 --readFilesIn r1.fq.gz r2.fq.gz --readFilesCommand zcat \\
+  --twopassMode Basic --outSAMtype BAM SortedByCoordinate \\
+  --outSAMattrRGline ID:cell_01 SM:cell_01 PL:ILLUMINA
 
-# 3. keep biallelic substitutions only, and drop anything under 5 reads
-bcftools view -v snps -m2 -M2 cell_01.vcf \\
-  | bcftools view -e 'FMT/DP<5' -o cell_01.ready.vcf
+# 2. call with GATK, which writes the seven read-level fields
+gatk MarkDuplicates -I Aligned.sortedByCoord.out.bam -O md.bam -M md.txt
+gatk SplitNCigarReads -R GRCh38.fa -I md.bam -O split.bam
+gatk HaplotypeCaller -R GRCh38.fa -I split.bam -O raw.vcf.gz \\
+  --dont-use-soft-clipped-bases true \\
+  --standard-min-confidence-threshold-for-calling 20
+gatk VariantFiltration -R GRCh38.fa -V raw.vcf.gz -O filt.vcf.gz \\
+  -window 35 -cluster 3 --filter-name FS -filter "FS > 30.0" \\
+  --filter-name QD -filter "QD < 2.0"
 
-# 4. optional: annotate with ANNOVAR
-table_annovar.pl cell_01.ready.vcf humandb/ -buildver hg38 -vcfinput \\
-  -protocol avsnp150,gnomad211_exome,cosmic104,rediportal -operation f,f,f,f
+# 3. biallelic substitutions on chr1-22, X, Y, then the quality filter
+bcftools view -v snps -m2 -M2 filt.vcf.gz \\
+  | bcftools view -f PASS -i 'FMT/DP>=3 && FMT/AD[0:1]>=3 && FMT/GQ>=30 &&
+      INFO/QD>=2 && INFO/MQ>=50 && INFO/FS<=30 && INFO/SOR<=3' \\
+  -o cell_01.ready.vcf
 
-# 5. upload cell_01.ready.vcf, or the table ANNOVAR wrote
+# 4. optional: annotate with ANNOVAR, through convert2annovar so the
+#    Otherinfo columns hold the VCF fields
+convert2annovar.pl -format vcf4 -includeinfo cell_01.ready.vcf \\
+  | sed 's/^chr//' > cell_01.avinput
+table_annovar.pl cell_01.avinput humandb/ -buildver hg38 -out cell_01 \\
+  -protocol avsnp150,gnomad30_genome,gnomad211_exome,cosmic104,rediportal \\
+  -operation f,f,f,f,f -nastring . -otherinfo
+
+# 5. upload cell_01.ready.vcf, or cell_01.hg38_multianno.txt
 """
 
 ROUTING = """
@@ -341,8 +361,8 @@ STATS = [
             "percent arose at the RNA level.",
             "The truth comes from sequencing the DNA of the same cell. A "
             "variant found in the DNA too is DNA_origin. One absent from the "
-            "DNA, where the DNA was covered at least five times and read as "
-            "reference, is RNA_only. Where the coverage did not reach, the "
+            "DNA, where the DNA was covered at least five times and no "
+            "alternative allele was called there, is RNA_only. Where the coverage did not reach, the "
             "variant was left out rather than guessed at.",
             "Amplifying the DNA of one cell sometimes loses one of the two "
             "copies, and an inherited variant on the lost copy then looks "
@@ -364,8 +384,8 @@ STATS = [
             "percent of the data arose at the RNA level, and that prevalence "
             "is what a model knowing nothing would score.",
             "The matching precision is 0.9711 at a threshold of 0.5 and "
-            "0.9909 at 0.867, which is where the high confidence setting "
-            "comes from.",
+            "0.9879 at 0.867, the high confidence setting. That threshold "
+            "was chosen on the original labels, where it gave 0.99.",
             "These figures are from the three cell lines above. What the "
             "models would score on primary tissue or another technology is "
             "not known.",
@@ -635,7 +655,7 @@ with st.sidebar:
         st.write(
             "45 single cells from three cell lines, HG001, HG002 and MOLM13, "
             "with the DNA of the same cells sequenced as the truth. 12,916 "
-            "labelled rows over 6,317 variants, of which 41.7 percent arose "
+            "labelled rows over 6,317 variants, of which 38.2 percent arose "
             "at the RNA level. Cross-validated with the folds grouped by "
             "variant, so no variant appears in both training and testing.")
 

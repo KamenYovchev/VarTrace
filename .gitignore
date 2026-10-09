@@ -10,7 +10,7 @@ __pycache__/
 build/
 dist/
 
-# геномни данни никога не влизат в хранилището
+# genomic data never goes into the repository
 *.vcf
 *.vcf.gz
 *.bam
@@ -24,5 +24,5 @@ data/
 # macOS
 .DS_Store
 
-# указанията за тестващите не са част от инструмента
+# the notes for testers are not part of the tool
 TESTING.md

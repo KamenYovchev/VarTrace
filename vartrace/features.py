@@ -155,7 +155,7 @@ def without_allele_counts(variants):
 
     It is the feature the models lean on most after the databases, and a file
     that does not carry AD or VAF cannot produce it. Scores from such a file
-    would look ordinary and mean nothing, so the caller warns about it.
+    would look ordinary and mean nothing, so the caller refuses when too many lack it.
     """
     return sum(1 for v in variants if v.features["vaf"] is None)
 

@@ -7,7 +7,7 @@ conda activate annotation
 
 ANNOVAR=${ROOT}/annovar
 HUMANDB=$ANNOVAR/humandb
-IN=${ROOT}/results/dna_step6_mainchr
+IN=${ROOT}/results/dna_mainchr
 OUT=${ROOT}/results/dna_annotated
 mkdir -p "$OUT"
 
@@ -22,7 +22,7 @@ for f in "$IN"/*.mainchr.vcf.gz; do
   perl "$ANNOVAR/table_annovar.pl" "$OUT/$base.avinput" "$HUMANDB/" \
     -buildver hg38 -out "$OUT/$base" -remove \
     -protocol "$PROTO" -operation "$OP" \
-    -nastring . -otherinfo > "$out/$base.annovar.log" 2>&1
+    -nastring . -otherinfo > "$OUT/$base.annovar.log" 2>&1
   if [ -f "$OUT/${base}.hg38_multianno.txt" ]; then
     n=$(( $(wc -l < "$OUT/${base}.hg38_multianno.txt") - 1 ))
     echo ">>> done DNA $base : $n annotated variants ($(date))"

@@ -83,7 +83,7 @@ log("Out-of-fold metrics")
 log()
 
 SITUATIONS = [
-    ("all five databases, many files", ["cells", "dbsnp", "gnomad", "redi", "cosmic"]),
+    ("all four databases, many files", ["cells", "dbsnp", "gnomad", "redi", "cosmic"]),
     ("dbSNP+gnomAD, many files", ["cells", "dbsnp", "gnomad"]),
     ("dbSNP+gnomAD, one file", ["dbsnp", "gnomad"]),
     ("gnomAD only, many files", ["cells", "gnomad"]),

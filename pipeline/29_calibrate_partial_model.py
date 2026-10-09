@@ -54,9 +54,9 @@ THRESHOLDS = [0.5, 0.867]
 X = df[FULL].values.astype(float)
 out = []
 
-# Situations named in English for the model description, Bulgarian for the report
+# Situations: name for the model description, name for the report, groups present
 SITUATIONS = [
-    ("all five databases, many files", "all five databases, many files",
+    ("all four databases, many files", "all four databases, many files",
      ["cells", "dbsnp", "gnomad", "redi", "cosmic"]),
     ("dbSNP+gnomAD, many files", "dbSNP+gnomAD, many files",
      ["cells", "dbsnp", "gnomad"]),

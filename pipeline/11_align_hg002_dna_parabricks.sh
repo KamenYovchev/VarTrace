@@ -38,7 +38,7 @@ run_sample () {
       --in-fq "$BASE/fastq/${s}_R1_001.fastq.gz" "$BASE/fastq/${s}_R2_001.fastq.gz" \
       --out-bam "$bam" \
       --num-gpus 1 \
-      >> "$base/logs/${s}.fq2bam.log" 2>&1 || { echo "!!! [$s] fq2bam failed"; return 1; }
+      >> "$BASE/logs/${s}.fq2bam.log" 2>&1 || { echo "!!! [$s] fq2bam failed"; return 1; }
   fi
   if [ ! -s "$vcf" ]; then
     echo ">>> [$s] deepvariant 1.8.0 on GPU $gpu ($(date))"
@@ -53,7 +53,7 @@ run_sample () {
       --output_vcf="$vcf" \
       --num_shards=$SHARDS \
       --intermediate_results_dir="$BASE/tmp/$s" \
-      >> "$base/logs/${s}.deepvariant.log" 2>&1 || { echo "!!! [$s] deepvariant failed"; return 1; }
+      >> "$BASE/logs/${s}.deepvariant.log" 2>&1 || { echo "!!! [$s] deepvariant failed"; return 1; }
     rm -rf "$BASE/tmp/$s"
   fi
   echo ">>> [$s] done ($(date))"

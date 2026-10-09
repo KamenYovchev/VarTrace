@@ -5,9 +5,9 @@ from SigProfilerAssignment import Analyzer as Analyze
 import os
 
 ROOT = os.environ.get("ROOT", "/data")
-OUT = ROOT + "/results/step8_signatures"
+OUT = ROOT + "/results/signatures"
 
-# Per-cell SBS96 (35 samples)
+# Per-cell SBS96 (45 cells)
 matGen.SigProfilerMatrixGeneratorFunc(
     "percell", "GRCh38", os.path.join(OUT, "per_cell_input") + "/",
     plot=False, exome=False, bed_file=None, chrom_based=False,
@@ -30,4 +30,4 @@ Analyze.cosmic_fit(
     export_probabilities=True, make_plots=False,
     sample_reconstruction_plots=False, verbose=False)
 
-print("Step 8 done: per-cell SBS96, per-group SBS96, group COSMIC fit.")
+print("done: per-cell SBS96, per-group SBS96, group COSMIC fit.")

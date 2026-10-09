@@ -1,17 +1,17 @@
 """Check that features.py reproduces the training table exactly.
 
-The models were trained on model_dataset_sig.csv, built by build_dataset.py.
+The models were trained on model_dataset_sig.csv, built by
+pipeline/21_build_feature_table.py.
 If the tool computes a feature even slightly differently, the models receive
 something other than what they learned on, and nothing else in the tool means
 anything. So every value of every feature is compared, for every row.
 
-Both files live on hpc00, so this runs there:
+Run from the repository root, with the labelled tables from step 18 and the
+training table from step 21:
 
-    PYTHONPATH=/data/vartrace /data/conda/envs/ml-cpu/bin/python \\
-        /data/vartrace/tests/check_features.py \\
-        /data/results/step9_labeled_bamfix /data/results/model_dataset_sig.csv
+    PYTHONPATH=. python tests/check_features.py <labelled_dir> <model_dataset_sig.csv>
 
-Two things are mirrored from build_dataset.py on purpose. Cross-cell features
+Two things are mirrored from 21_build_feature_table.py on purpose. Cross-cell features
 were computed per cell line, not over all 45 cells, so the cells are grouped the
 same way here. And they counted only labelled variants, so rows that are not in
 the training table are dropped before the cross-cell step.

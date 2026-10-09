@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""The figures of the results chapter, from the same models as its numbers.
+"""The figures of the results chapter.
+
+ROC, calibration and SHAP are computed here. The feature-group progression is
+plotted from the numbers step 26 printed.
 
 Usage: 46_make_thesis_figures.py <dataset_sig.csv> <outdir>
 """
@@ -94,6 +97,10 @@ plt.tight_layout()
 plt.savefig(os.path.join(outdir, "calibration.png"), dpi=200)
 plt.close()
 print("calibrated, ROC-AUC %.4f" % roc_auc_score(y, q35))
+for name, p in [("uncalibrated", p35), ("calibrated", q35)]:
+    hit = p >= 0.867
+    print("%s at 0.867: precision %.4f  recall %.4f"
+          % (name, y[hit].mean(), hit[y == 1].mean()))
 for a, b in zip(mean, frac):
     print("  predicted %.3f  observed %.3f" % (a, b))
 
@@ -111,3 +118,15 @@ plt.savefig(os.path.join(outdir, "shap_summary.png"), dpi=200, bbox_inches="tigh
 plt.close()
 order = np.argsort(-np.abs(sv).mean(axis=0))
 print("SHAP, top features:", [WITH_DB[i] for i in order[:6]])
+
+# Importance table: the built-in importance of the calibrated model, averaged
+# over its three calibration parts. Same model as the one saved in step 27.
+imp = SimpleImputer(strategy="median")
+cal = CalibratedClassifierCV(GradientBoostingClassifier(**PARAMS), method="isotonic",
+                             cv=3).fit(imp.fit_transform(df[WITH_DB].values), y)
+fi = np.mean([c.estimator.feature_importances_ for c in cal.calibrated_classifiers_], axis=0)
+order = np.argsort(-fi)
+print("importance:")
+for i in order[:6]:
+    print("  %-18s %.3f" % (WITH_DB[i], fi[i]))
+print("  other %d together %.3f" % (len(order) - 6, fi[order[6:]].sum()))

@@ -158,9 +158,9 @@ log("  the model gets %d of them" % caught2.sum())
 log()
 
 log("Result")
-log("Novel variants are almost all one class (RNA_only share %.3f),")
-log("so metrics there say little."
+log("Novel variants are almost all one class (RNA_only share %.3f),"
     % y[novel].mean())
+log("so metrics there say little.")
 log()
 log("Known variants: RNA_only share %.3f."
     % y[known].mean())

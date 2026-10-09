@@ -7,9 +7,7 @@ out once.
 
 Run with an environment that has requests:
 
-    PYTHONPATH=/data/vartrace /data/conda/envs/read-qc/bin/python \\
-        /data/vartrace/tests/fetch_ensembl.py \\
-        /data/results/model_dataset_sig.csv /data/results/ensembl_answers.tsv
+    PYTHONPATH=. python tests/fetch_ensembl.py <model_dataset_sig.csv> <ensembl_answers.tsv>
 
 The questions are put through vartrace.annotate itself rather than through a
 copy of it, so what is measured afterwards is what the tool really does.
