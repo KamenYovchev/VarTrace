@@ -1,6 +1,6 @@
 #!/bin/sh
 # Installs VarTrace on macOS and Linux.
-#   curl -LsSf https://codeberg.org/KamenYovchev/vartrace/raw/branch/main/install.sh | sh
+#   curl -LsSf https://raw.githubusercontent.com/KamenYovchev/VarTrace/main/install.sh | sh
 set -eu
 
 say() { printf '%s\n' "$*"; }

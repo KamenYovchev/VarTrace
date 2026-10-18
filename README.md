@@ -22,7 +22,7 @@ variants scored that way, about 87 really are absent from the genome.
 
 One line, and it does not matter whether you have Python:
 
-    curl -LsSf https://codeberg.org/KamenYovchev/vartrace/raw/branch/main/install.sh | sh
+    curl -LsSf https://raw.githubusercontent.com/KamenYovchev/VarTrace/main/install.sh | sh
 
 Then vartrace opens the interface in your browser. The installer uses
 whatever you already have and fetches a Python of its own only if you have
@@ -37,7 +37,7 @@ If you keep your own Python environments, the ordinary route works too:
 
 or, for the latest state of the source:
 
-    pipx install "git+https://codeberg.org/KamenYovchev/vartrace.git"
+    pipx install "git+https://github.com/KamenYovchev/VarTrace.git"
 
 The trained models come with the package and the web interface is included, so
 nothing else has to be downloaded or installed separately.
@@ -153,6 +153,32 @@ settings, the features it expects in order, what it was trained on, and its
 validation metrics.
 
 
+## How well it works
+
+Both figures come from five-fold cross-validation with the folds split by
+variant, so a variant seen in several cells never sits on both sides. The
+labels are the corrected ones the shipped models are trained on, 12,916 rows
+from 45 cells. docs/make_figures.py redraws them from the training table.
+
+![Precision and recall](docs/figures/precision_recall.png)
+
+With the databases, PR-AUC is 0.987 and ROC-AUC 0.988. From the RNA data alone
+they are 0.900 and 0.933. The dotted line is what guessing would give.
+
+![Calibration](docs/figures/calibration.png)
+
+The calibrated score can be read as a probability: the points lie close to the
+diagonal, with an expected calibration error of 0.005 with the databases and
+0.062 without them. Most variants get a score below 0.1 or above 0.9; the bins
+in between hold between 61 and 170 variants each, which is why the curve is
+less smooth there.
+
+These numbers are measured on the same three cell lines the models were trained
+on. When a whole cell line is held out, trained and scored with the corrected
+labels, ROC-AUC is between 0.979 and 0.993 with the databases and between 0.911
+and 0.927 from the RNA data alone, depending on the line.
+
+
 ## Scope and limitations
 
 The models were trained on 45 single cells from three cell lines, sequenced with
@@ -171,6 +197,12 @@ is recorded in the output.
 
 The scripts behind the thesis, from the raw reads to the trained models, are in
 pipeline/. See pipeline/README.md for the order and the settings.
+
+
+## Where the code lives
+
+https://github.com/KamenYovchev/VarTrace, with a mirror at
+https://codeberg.org/KamenYovchev/vartrace. The thesis refers to the latter.
 
 
 ## Licence

@@ -678,7 +678,7 @@ with st.sidebar:
             "using Ensembl rather than ANNOVAR cost 0.0009 PR-AUC and changed "
             "the call for 0.87 percent of variants.")
 
-    st.markdown("[Project source](https://codeberg.org/KamenYovchev/vartrace)")
+    st.markdown("[Project source](https://github.com/KamenYovchev/VarTrace)")
     st.caption("Code under PolyForm Noncommercial 1.0.0, models under "
                "CC BY-NC 4.0. Uploaded files are deleted as soon as the "
                "scores are computed.")

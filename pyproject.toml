@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.urls]
-Source = "https://codeberg.org/KamenYovchev/vartrace"
+Source = "https://github.com/KamenYovchev/VarTrace"
 
 [project.scripts]
 vartrace = "vartrace.cli:main"
