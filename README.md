@@ -18,6 +18,13 @@ probability rather than a yes or no. A score of 0.87 means that of a hundred
 variants scored that way, about 87 really are absent from the genome.
 
 
+## Trying it online
+
+The web interface also runs at https://vartrace.bioinformatics.science, for
+trying it without installing anything. Files loaded there are sent to that
+server. For data that must stay on your own machine, install it as below.
+
+
 ## Installing
 
 One line, and it does not matter whether you have Python:
@@ -203,6 +210,7 @@ pipeline/. See pipeline/README.md for the order and the settings.
 
 https://github.com/KamenYovchev/VarTrace, with a mirror at
 https://codeberg.org/KamenYovchev/vartrace. The thesis refers to the latter.
+The web interface runs online at https://vartrace.bioinformatics.science.
 
 
 ## Licence
