@@ -52,6 +52,18 @@ with op as fh:
                              "ad": d.get("AD", "."), "vaf": d.get("VAF", "."),
                              "gq": d.get("GQ", "."), "filt": f[6]}
 
+def carries(rec, alt):
+    """True if the DNA genotype contains this ALT allele, not merely lists it in ALT.
+
+    In a multi-allelic record such as ALT=A,T with GT=0/1 the cell carries A only,
+    so an RNA G>T must not count as found in the DNA.
+    """
+    if alt not in rec["alts"]:
+        return False
+    index = str(rec["alts"].index(alt) + 1)
+    return index in rec["gt"].replace("|", "/").split("/")
+
+
 def in_gnomad(f):
     for c in af_cols:
         v = f[c]
@@ -78,7 +90,7 @@ with open(out_file, "w") as out:
         dp = gt = ad = vaf = filt = "."
         if rec:
             dp, gt, ad, vaf, filt = str(rec["dp"]), rec["gt"], rec["ad"], rec["vaf"], rec["filt"]
-            matched = (alt in rec["alts"]) and (rec["gt"] not in ("0/0", "0|0", "./.", "."))
+            matched = carries(rec, alt)
             if matched:
                 setv, status = "1", "dna_variant"
                 label = "germline" if (g_in or dbsnp) else ("somatic" if cosmic else "novel_DNA")
