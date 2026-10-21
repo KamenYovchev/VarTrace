@@ -52,16 +52,29 @@ with op as fh:
                              "ad": d.get("AD", "."), "vaf": d.get("VAF", "."),
                              "gq": d.get("GQ", "."), "filt": f[6]}
 
-def carries(rec, alt):
-    """True if the DNA genotype contains this ALT allele, not merely lists it in ALT.
+AD_MIN = 3
 
-    In a multi-allelic record such as ALT=A,T with GT=0/1 the cell carries A only,
-    so an RNA G>T must not count as found in the DNA.
+
+def carries(rec, alt):
+    """True if the DNA carries this ALT allele, not merely lists it in ALT.
+
+    In a multi-allelic record such as ALT=A,T with GT=0/1 the genotype names A only.
+    The allele still counts as present when the genotype is not reference and at
+    least AD_MIN DNA reads show it, because the caller can leave a seen allele out
+    of the genotype.
     """
     if alt not in rec["alts"]:
         return False
-    index = str(rec["alts"].index(alt) + 1)
-    return index in rec["gt"].replace("|", "/").split("/")
+    index = rec["alts"].index(alt) + 1
+    alleles = rec["gt"].replace("|", "/").split("/")
+    if str(index) in alleles:
+        return True
+    if not any(a not in ("0", ".", "") for a in alleles):
+        return False
+    try:
+        return int(rec["ad"].split(",")[index]) >= AD_MIN
+    except (ValueError, IndexError):
+        return False
 
 
 def in_gnomad(f):
